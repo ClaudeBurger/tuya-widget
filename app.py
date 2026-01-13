@@ -45,7 +45,19 @@ def get_status(token):
 def status():
     try:
         token = get_token()
-        on = get_status(token)
-        return jsonify({"on": on})
+        t = str(int(time.time()*1000))
+        s = sign(os.environ["CLIENT_ID"] + token + t)
+        r = requests.get(
+            f"{BASE_URL}/v1.0/devices/{DEVICE_ID}/status",
+            headers={
+                "client_id": os.environ["CLIENT_ID"],
+                "access_token": token,
+                "t": t,
+                "sign": s,
+                "sign_method": "HMAC-SHA256"
+            }
+        ).json()
+        # On renvoie tout le JSON reçu
+        return jsonify(r)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
